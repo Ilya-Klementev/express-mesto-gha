@@ -36,6 +36,9 @@ function deleteCard(req, res) {
       return res.status(200).send(card);
     })
     .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({message: "Переданы некорректные данные для удаления карточки"});
+      }
       return res.status(500).send({message: "Ошибка сервера"});
     })
 
@@ -72,7 +75,7 @@ function deleteLike(req, res) {
       return res.status(200).send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(400).send({message: "Переданы некорректные данные для постановки/снятии лайка"});
       }
       return res.status(500).send({message: "Ошибка сервера"});
