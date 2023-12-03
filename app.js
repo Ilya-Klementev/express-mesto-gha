@@ -23,6 +23,10 @@ app.use((req, res, next) => {
 app.use(cardsRoutes);
 app.use(usersRoutes);
 
+app.use((req, res, next) => {
+  res.status(404).send({ message: 'Запрашиваемая страница не найдена' });
+});
+
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`)
 });
