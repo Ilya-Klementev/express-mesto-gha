@@ -47,14 +47,14 @@ function putLike(req, res) {
     { $addToSet: { likes: req.user._id } },
     { new: true },)
     .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: 'Карточка не найдена' });
-      }
       return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({message: "Переданы некорректные данные для постановки/снятии лайка"});
+        return res.status(400).send({message: "Передан несуществующий _id карточки"});
+      }
+      if (err.name === 'CastError') {
+        return res.status(404).send({message: "Переданы некорректные данные для постановки/снятии лайка"});
       }
       return res.status(500).send({message: "Ошибка сервера"});
     })
