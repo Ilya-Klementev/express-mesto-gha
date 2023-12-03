@@ -50,11 +50,8 @@ function putLike(req, res) {
       return res.status(200).send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({message: "Передан несуществующий _id карточки"});
-      }
       if (err.name === 'CastError') {
-        return res.status(404).send({message: "Переданы некорректные данные для постановки/снятии лайка"});
+        return res.status(400).send({message: "Переданы некорректные данные для постановки/снятии лайка"});
       }
       return res.status(500).send({message: "Ошибка сервера"});
     })
