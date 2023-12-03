@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 app.use(cardsRoutes);
 app.use(usersRoutes);
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).send({ message: 'Запрашиваемая страница не найдена' });
 });
 
