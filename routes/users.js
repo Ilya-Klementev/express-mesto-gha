@@ -7,5 +7,4 @@ router.post('/users', userController.createUser);
 router.get('/users/:id', userController.readUser);
 router.get('/users', userController.readAllUsers);
 
-
 module.exports = router;
