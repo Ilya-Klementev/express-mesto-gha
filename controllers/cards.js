@@ -18,29 +18,35 @@ function createCard(req, res, next) {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании пользователя'));
+        return next(new ValidationError('Переданы некорректные данные при создании пользователя'));
       }
       return next(err);
     });
 }
 
 function deleteCard(req, res, next) {
-  return cardModel.findOneAndDelete({ _id: req.params.cardId })
+  cardModel.findById(req.params.cardId)
     .then((card) => {
-      if (!card || card.length === 0) {
-        next(new NotFoundError('Карточка не найдена'));
+      if (!card) {
+        return next(new NotFoundError('Карточка не найдена'));
       }
+
       if (req.user._id !== card.owner.toString()) {
-        next(new ForbiddenError('Вы не владелец карточки'));
+        return next(new ForbiddenError('Вы не владелец карточки'));
       }
-      return res.status(200).send(card);
+
+      return cardModel.findByIdAndDelete(req.params.cardId)
+        .then((deletedCard) => {
+          res.status(200).send(deletedCard);
+        })
+        .catch((err) => {
+          if (err.name === 'CastError') {
+            return next(new CastError('Переданы некорректные данные для удаления карточки'));
+          }
+          return next(err);
+        });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные для удаления карточки'));
-      }
-      return next(err);
-    });
+    .catch(next);
 }
 
 function putLike(req, res, next) {
@@ -51,13 +57,13 @@ function putLike(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Передан несуществующий _id карточки'));
+        return next(new NotFoundError('Передан несуществующий _id карточки'));
       }
       return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные для постановки/снятии лайка'));
+        return next(new CastError('Переданы некорректные данные для постановки/снятии лайка'));
       }
       return next(err);
     });

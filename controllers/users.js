@@ -14,7 +14,7 @@ function readMe(req, res, next) {
   userModel.find({ _id })
     .then((user) => {
       if (!user || user.length === 0) {
-        next(new NotFoundError('Пользователь не найден'));
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.send(...user);
     })
@@ -24,14 +24,14 @@ function readMe(req, res, next) {
 async function login(req, res, next) {
   const { email, password } = req.body;
   if (!email || !password) {
-    next(new CastError('Почта или пароль отсутствуют'));
+    return next(new CastError('Почта или пароль отсутствуют'));
   }
 
   try {
     const user = await userModel.findOne({ email }).select('+password');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      next(new UnauthorizedError('Неправильная почта или пароль'));
+      return next(new UnauthorizedError('Неправильная почта или пароль'));
     }
 
     const payload = { _id: user._id };
@@ -69,10 +69,10 @@ function createUser(req, res, next) {
       })
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          next(new ValidationError('Переданы некорректные данные при создании пользователя'));
+          return next(new ValidationError('Переданы некорректные данные при создании пользователя'));
         }
         if (err.code === 11000) {
-          next(new ConflictError('Пользователь с таким E-mail уже создан'));
+          return next(new ConflictError('Пользователь с таким E-mail уже создан'));
         }
         return next(err);
       });
@@ -96,7 +96,7 @@ function readUser(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные пользователя'));
+        return next(new CastError('Переданы некорректные данные пользователя'));
       }
       return next(err);
     });
@@ -111,13 +111,13 @@ function patchProfile(req, res, next) {
   )
     .then((user) => {
       if (!user || user.length === 0) {
-        next(new NotFoundError('Пользователь не найден'));
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new CastError('Переданы некорректные данные при обновлении профиля'));
+        return next(new CastError('Переданы некорректные данные при обновлении профиля'));
       }
       return next(err);
     });
@@ -128,13 +128,13 @@ function patchAvatar(req, res, next) {
   return userModel.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user || user.length === 0) {
-        next(new NotFoundError('Пользователь не найден'));
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
+        return next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
       }
       return next(err);
     });
