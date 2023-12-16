@@ -62,7 +62,11 @@ function createUser(req, res, next) {
       email,
       password: hash,
     })
-      .then((user) => res.status(201).send(user))
+      .then((user) => {
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+        res.status(201).send(userWithoutPassword);
+      })
       .catch((err) => {
         if (err.name === 'ValidationError') {
           next(new ValidationError('Переданы некорректные данные при создании пользователя'));
@@ -86,7 +90,7 @@ function readUser(req, res, next) {
   return userModel.findById(userId)
     .then((user) => {
       if (!user || user.length === 0) {
-        next(new NotFoundError('Пользователь не найден'));
+        return next(new NotFoundError('Пользователь не найден'));
       }
       return res.status(200).send(user);
     })

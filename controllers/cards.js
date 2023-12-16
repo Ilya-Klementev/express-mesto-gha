@@ -71,13 +71,13 @@ function deleteLike(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
+        return next(new NotFoundError('Карточка не найдена'));
       }
       return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные для постановки/снятии лайка'));
+        return next(new CastError('Переданы некорректные данные для постановки/снятии лайка'));
       }
       return next(err);
     });
